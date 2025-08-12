@@ -122,8 +122,16 @@ wss.on('connection',function connection(ws,req){
 
      if(content.type === 'sendMessage'){
      const targetSocket = clients.get(content?.to)
-     console.log('\n to --->',content?.to);
-     
+
+     content?.files?.forEach(file=>{
+      const data  = file.data.split(',')[1]
+      const fileBuffer = Buffer.from(data,'base64')
+      const fs = require("fs")
+      const filePath = require('path').join(__dirname,`SendedFiles/${userId}-${Date.now()}-${file.name.replace(/\s+/g, '')}`)
+      fs.writeFileSync(filePath,fileBuffer)
+      console.log('saved file-->',filePath);
+      content.files.path=filePath
+     })
       // store message permanently
       let newConv = await conversationModule.findOne({members:{$all:[userId,content?.to]}})
       if(!newConv){
@@ -134,9 +142,14 @@ wss.on('connection',function connection(ws,req){
       }
       const newMessage = await new messageModule({conversationId:newConv?._id,
         senderId:userId,
-        text:content.message
+        text:content.message,
+        isFile:content?.files?true:false,
+        path:content?.files?.path
       })
       await newMessage.save()
+
+      console.log(newMessage);
+      
        
       const updatedConvo = await conversationModule.findOneAndUpdate({members:{$all:[userId,content?.to]}},{
         lastMessage:newMessage._id
@@ -150,7 +163,7 @@ wss.on('connection',function connection(ws,req){
        UpdateAndSendRecentChats(content?.to,targetSocket)
 
       }
-
+     
       if(ws.readyState == WebSocket.OPEN){
       ws.send(JSON.stringify({ from: userId, message: newMessage }));
        UpdateAndSendRecentChats(userId,ws)
