@@ -7,7 +7,7 @@ const message=mongoose.Schema({
    seenBy:{type:[mongoose.Schema.Types.ObjectId],required:true,ref:'allUser',default:[null]},
    isFile:{type:Boolean,default:false},
    sendAt:{type:Date,default:Date.now,required:true},
-   path:String
+   path:Array
 })
 
 message.pre('save',function(next){

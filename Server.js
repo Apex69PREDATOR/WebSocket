@@ -13,7 +13,7 @@ require("dotenv").config()
 
 app.use(cors())
 app.use(express.json())
-
+app.use('/uploads',express.static(require("path").join(__dirname,'SendedFiles')))
 connectCluster()
 
 async function UpdateAndSendRecentChats(userId,ws){ 
@@ -122,15 +122,16 @@ wss.on('connection',function connection(ws,req){
 
      if(content.type === 'sendMessage'){
      const targetSocket = clients.get(content?.to)
-
+     const pathList  = []
      content?.files?.forEach(file=>{
       const data  = file.data.split(',')[1]
       const fileBuffer = Buffer.from(data,'base64')
       const fs = require("fs")
-      const filePath = require('path').join(__dirname,`SendedFiles/${userId}-${Date.now()}-${file.name.replace(/\s+/g, '')}`)
+      const fileName = `${userId}-${Date.now()}-${file.name.replace(/\s+/g, '')}`
+      const filePath = require('path').join(__dirname,`SendedFiles/${fileName}`)
       fs.writeFileSync(filePath,fileBuffer)
       console.log('saved file-->',filePath);
-      content.files.path=filePath
+      pathList.push(fileName)
      })
       // store message permanently
       let newConv = await conversationModule.findOne({members:{$all:[userId,content?.to]}})
@@ -144,7 +145,7 @@ wss.on('connection',function connection(ws,req){
         senderId:userId,
         text:content.message,
         isFile:content?.files?true:false,
-        path:content?.files?.path
+        path:pathList.length>0?pathList:null
       })
       await newMessage.save()
 
