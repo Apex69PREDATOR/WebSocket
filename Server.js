@@ -104,7 +104,9 @@ wss.on('connection',function connection(ws,req){
      }
 
      if(content.type === 'messageSeen'){
-         const updatedSeenMessage = await messageModule.findByIdAndUpdate(content.message,{
+      console.log('message seen',content);
+      
+         const updatedSeenMessage = await messageModule.findByIdAndUpdate(content?.message,{
           seenBy:[userId]
          },{new:true})
 
@@ -204,7 +206,7 @@ catch(err){
 app.use('/auth',require('./Authorize/HandleAuth'))
 app.use('/find',require('./Chat&Groups/Search'))
 app.use('/beSocial',require('./Chat&Groups/AddFriend'))
-app.use('/profile',require('./Authorize/AddProfilePic'))
+app.use('/profile',require('./Authorize/EditProfile'))
 
 
 app.listen(portHttp,()=>{

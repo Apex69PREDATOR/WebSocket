@@ -7,14 +7,16 @@ const storage = multer.diskStorage({
       const dest=path.join(__dirname,'Uploads/others')
       cb(null,dest)
       }
-      else if(file.fieldname==='profile'){
-        const dest=path.join(__dirname,'Uploads/profile')
+      else if(file.fieldname==='profilePic'){
+        const dest=path.join(__dirname,'../Uploads/profile')
         cb(null,dest)
+        console.log('file uploaded');
+        
       }
 
     },
     filename:(req,file,cb)=>{
-        const filename = file.originalname + '_' + file.fieldname + "_" + Date.now() 
+        const filename = file.fieldname + "_" + Date.now() + "_" + file.originalname.replace(/\s+/g, '') 
         cb(null,filename)
     }
 })
