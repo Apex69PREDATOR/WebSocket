@@ -6,7 +6,8 @@ const userModule=mongoose.Schema({
     email:{required:true,type:String,unique:true},
     phone:{required:true,type:String,unique:true},
     password:{required:true,type:String},
-    profilepic:{type:String}
+    profilePic:{type:String},
+    about:{type:String}
 })
 
 const userSchema = mongoose.model('allUser',userModule)

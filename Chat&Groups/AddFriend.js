@@ -11,7 +11,6 @@ async function sendImmediateRequests(senderId,targetSocket,type){
         const requestedUserObj = requestedUser.toObject()
 
         delete requestedUserObj.password
-        console.log(requestedUserObj);
         
         if(targetSocket && targetSocket.readyState == WebSocket.OPEN){
           targetSocket?.send(JSON.stringify({type,requestedUserObj}))
@@ -23,6 +22,12 @@ async function sendImmediateRequests(senderId,targetSocket,type){
 router.post('/add',verifyToken,async (req,res)=>{
   try{
     const {receiverId,senderId} = req.body
+    const Friends = await friendModule.findOne({id:receiverId})
+    
+    if(Friends?.friends?.find(friend=>(friend?.id==senderId))){
+      return res.status(404).json({message:'user is already your friend'})
+    }
+    
      const targetSocket = clients.get(receiverId)
     const newRequest = {id:senderId,requestAt:new Date()}
     const requestDoc = await requestModule.findOne({id:receiverId})
@@ -173,5 +178,29 @@ router.post('/accept',verifyToken,async(req,res)=>{
   }
 })
 
+router.post('/decline',verifyToken,async (req,res)=>{
+
+  try{
+
+  const {selfId,deletedId} = req.body
+   
+  const updatedDoc = await requestModule.findOneAndUpdate({id:selfId},{$pull:{
+    requests:{id:deletedId}
+  }},{new:true})
+ 
+  
+  if(!updatedDoc)
+    return res.status(404).json({message:'user not found'})
+
+  return res.status(200).json({success:true,message:'Request removed successfully!'})
+
+  }
+  
+  catch(err){
+    console.log(err);
+    return res.status(500).json({message:"some server error occured. Don't worry the developer team will fix this issue"})
+  }
+
+})
 
 module.exports=router

@@ -14,6 +14,9 @@ require("dotenv").config()
 app.use(cors())
 app.use(express.json())
 app.use('/uploads',express.static(require("path").join(__dirname,'SendedFiles')))
+app.use('/uploads',express.static(require("path").join(__dirname,'Uploads')))
+
+
 connectCluster()
 
 async function UpdateAndSendRecentChats(userId,ws){ 
