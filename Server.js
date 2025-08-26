@@ -38,7 +38,9 @@ async function UpdateAndSendRecentChats(userId,ws){
       ws.send(JSON.stringify({otherMembers,recentMessages,type:'recentChats'}))
 }
 
-const wss = new WebSocket.Server({port})
+const wss = new WebSocket.Server({port,
+  maxPayload: 200 * 1024 * 1024
+})
 
 const statusRequests = new Map()
 
