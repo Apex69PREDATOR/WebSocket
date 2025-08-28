@@ -11,7 +11,10 @@ const messageModule = require("./Schemas/Messages")
 const clients = require("./SocketStore")
 require("dotenv").config()
 
-app.use(cors())
+app.use(cors({
+  origin:process.env.ALLOWED_DOMIAN,
+  methods:['GET','POST','DELETE','PUT']
+}))
 app.use(express.json())
 app.use('/uploads',express.static(require("path").join(__dirname,'SendedFiles')))
 app.use('/uploads',express.static(require("path").join(__dirname,'Uploads')))
@@ -46,6 +49,11 @@ const statusRequests = new Map()
 
 wss.on('connection',function connection(ws,req){
   try{
+    const sourceDomain =  req.headers.origin
+    if(sourceDomain!==process.env.ALLOWED_DOMIAN){
+      ws.close()
+      return
+    }
     const params = new URLSearchParams(url.parse(req.url).query)
     const userId = params.get('userId')
 

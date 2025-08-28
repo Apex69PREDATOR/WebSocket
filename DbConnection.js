@@ -1,8 +1,9 @@
-
+require('dotenv').config()
 const mongoose = require('mongoose');
-const db_password = encodeURIComponent('wdDAhKq4LM55Exis')
+const db_password = encodeURIComponent(process.env.CLUSTER_PASSWORD)
 const db_name='AIchat'
-const uri = `mongodb+srv://arpana036:${db_password}@apex.2k0me.mongodb.net/${db_name}?retryWrites=true&w=majority&appName=apex`;
+const uri = `mongodb+srv://${process.env.CLUSTER_OWNER}:${db_password}@${process.env.CLUSTER_ADDRESS}/${db_name}?retryWrites=true&w=majority&appName=${process.env.CLUSTER_NAME}`;
+
 
 const clientOptions = { serverApi: { version: '1', strict: true, deprecationErrors: true } };
 

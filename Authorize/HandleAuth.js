@@ -76,7 +76,6 @@ router.post('/signup',async(req,res)=>{
 
 })
 router.get('/validate',verifyToken,(req,res)=>{
-    console.log('ewf');
     
     res.status(200).json({userDih:req.user,success:true})
 })
