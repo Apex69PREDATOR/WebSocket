@@ -3,13 +3,14 @@ const userModel = require("../Schemas/User")
 const EditModel = require("../Schemas/LastEdited")
 const storageEngine = require("../Middlewares/Upload")
 const verifyToken = require("../Middlewares/VerifyToken")
+require('dotenv').config()
 route.post('/editProfile',verifyToken,storageEngine.single("profilePic"),async(req,res)=>{
   try{
     
   const editedObj = {}
 
   if(req.file){
-    editedObj.profilePic = 'http://localhost:5000' + '/uploads/profile/' + req.file.filename
+    editedObj.profilePic = process.env.SELF_DOMAIN + '/uploads/profile/' + req.file.filename
   }
   Object.keys(req.body).forEach((key)=>{
     const value = req.body[key]
