@@ -37,7 +37,7 @@ router.post('/add',verifyToken,async (req,res)=>{
             requests:[newRequest]
         })
         await requestDoc.save()
-        res.status(200).json({success:true})
+        res.status(200).json({success:true,message:'requested'})
         sendImmediateRequests(senderId,targetSocket,'incommingRequests')
     }
     else{
@@ -51,7 +51,7 @@ router.post('/add',verifyToken,async (req,res)=>{
         sendImmediateRequests(senderId,targetSocket,'incommingRequests')
        
 
-        res.status(200).json({success:true})
+        res.status(200).json({success:true,message:'requested'})
         return
       }
       
@@ -61,14 +61,13 @@ router.post('/add',verifyToken,async (req,res)=>{
             $push:{requests:newRequest}
         })
         
-        res.status(200).json({success:true})
+        res.status(200).json({success:true,message:'requested'})
         
         sendImmediateRequests(senderId,targetSocket,'incommingRequests')
         
       }
       else{
-        res.status(401).json({message:'already requested'})
-        console.log('Pending request');
+        res.status(401).json({message:'already has pending request from you'})
         
       }
       
@@ -112,6 +111,28 @@ router.get('/pending/:userId', verifyToken, async (req, res) => {
   } catch (error) {
     console.error(error);
   }
+})
+router.get('/viewProfile/:profileId/:userId',verifyToken,async (req,res)=>{
+  const profileId= req.params.profileId
+  const userId = req.params.userId
+  console.log(req.params);
+  
+  const profileFriends = await friendModule.findOne({id:profileId}).select('friends')
+  console.log(profileFriends);
+  
+  const onlyFriends = profileFriends.friends.map(val=>(val.id)) 
+  
+  const profileFriendsDetails = await userModel.find({_id:{$in:onlyFriends}}).select('email profilePic fname lname about')
+
+  const isFriend=onlyFriends.includes(userId)
+  
+  const profileDetails = await userModel.findById(profileId).select(`-password${isFriend?'':' -phone'}`)
+
+  console.log(profileDetails,profileFriendsDetails);
+  
+  res.status(200).json({success:true,profileDetails,profileFriendsDetails,isFriend})
+  
+
 })
 router.post('/accept',verifyToken,async(req,res)=>{
   try{

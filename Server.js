@@ -63,7 +63,6 @@ wss.on('connection',function connection(ws,req){
       return;
     }
     
-    console.log(userId);
     
     clients.set(userId,ws)
 
@@ -76,7 +75,6 @@ wss.on('connection',function connection(ws,req){
       }
     })
 
-    console.log('client connected');
     
   ws.on('message',async function incomming(data){
     
