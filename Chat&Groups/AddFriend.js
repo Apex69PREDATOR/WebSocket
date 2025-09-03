@@ -14,7 +14,6 @@ async function sendImmediateRequests(senderId,targetSocket,type){
         
         if(targetSocket && targetSocket.readyState == WebSocket.OPEN){
           targetSocket?.send(JSON.stringify({type,requestedUserObj}))
-          console.log('sended');
           
         }
 }
@@ -115,10 +114,8 @@ router.get('/pending/:userId', verifyToken, async (req, res) => {
 router.get('/viewProfile/:profileId/:userId',verifyToken,async (req,res)=>{
   const profileId= req.params.profileId
   const userId = req.params.userId
-  console.log(req.params);
   
   const profileFriends = await friendModule.findOne({id:profileId}).select('friends')
-  console.log(profileFriends);
   
   const onlyFriends = profileFriends.friends.map(val=>(val.id)) 
   
@@ -128,7 +125,6 @@ router.get('/viewProfile/:profileId/:userId',verifyToken,async (req,res)=>{
   
   const profileDetails = await userModel.findById(profileId).select(`-password${isFriend?'':' -phone'}`)
 
-  console.log(profileDetails,profileFriendsDetails);
   
   res.status(200).json({success:true,profileDetails,profileFriendsDetails,isFriend})
   

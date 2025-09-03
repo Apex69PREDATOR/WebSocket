@@ -8,7 +8,6 @@ const verifyToken = (req, res, next) => {
   const token = authHeader && authHeader.split(' ')[1];
 
   if (!token) {
-    console.log('denied');
     
     return res.status(401).json({ message: "Access denied. No token provided." });
   }

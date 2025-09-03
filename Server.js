@@ -94,7 +94,6 @@ wss.on('connection',function connection(ws,req){
 
           
          ws.send(JSON.stringify({isOnline,type:'status',previousMessages,onlineId:content.id}))
-         console.log(isOnline);
 
          
 
@@ -115,7 +114,6 @@ wss.on('connection',function connection(ws,req){
      }
 
      if(content.type === 'messageSeen'){
-      console.log('message seen',content);
       
          const updatedSeenMessage = await messageModule.findByIdAndUpdate(content?.message,{
           seenBy:[userId]
@@ -125,7 +123,6 @@ wss.on('connection',function connection(ws,req){
         const targetSocket = clients.get(updatedSeenMessage.senderId.toString())
         if(targetSocket && targetSocket.readyState === WebSocket.OPEN){
           targetSocket.send(JSON.stringify({seenId:updatedSeenMessage._id,type:'seenId'}))
-          console.log('sended message seen');
           
         }
 
@@ -143,7 +140,6 @@ wss.on('connection',function connection(ws,req){
       const fileName = `${userId}-${Date.now()}-${file.name.replace(/\s+/g, '')}`
       const filePath = require('path').join(__dirname,`SendedFiles/${fileName}`)
       fs.writeFileSync(filePath,fileBuffer)
-      console.log('saved file-->',filePath);
       pathList.push(fileName)
      })
       // store message permanently
@@ -162,7 +158,6 @@ wss.on('connection',function connection(ws,req){
       })
       await newMessage.save()
 
-      console.log(newMessage);
       
        
       const updatedConvo = await conversationModule.findOneAndUpdate({members:{$all:[userId,content?.to]}},{
@@ -184,9 +179,6 @@ wss.on('connection',function connection(ws,req){
       }
       
        
-     else {
-      console.log(`User ${content.to} is not connected`);
-    }
      
   }
   })
@@ -201,7 +193,6 @@ wss.on('connection',function connection(ws,req){
       }
     })
     clients.delete(userId)
-    console.log('Client disconnected');
   });
   ws.on('error', (err) => {
   console.error('WebSocket error:', err);

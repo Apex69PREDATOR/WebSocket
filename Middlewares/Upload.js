@@ -10,7 +10,6 @@ const storage = multer.diskStorage({
       else if(file.fieldname==='profilePic'){
         const dest=path.join(__dirname,'../Uploads/profile')
         cb(null,dest)
-        console.log('file uploaded');
         
       }
 
