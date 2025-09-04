@@ -3,6 +3,7 @@ const userModel = require("../Schemas/User")
 const EditModel = require("../Schemas/LastEdited")
 const storageEngine = require("../Middlewares/Upload")
 const verifyToken = require("../Middlewares/VerifyToken")
+const fs = require("fs")
 require('dotenv').config()
 route.post('/editProfile',verifyToken,storageEngine.single("profilePic"),async(req,res)=>{
   try{
@@ -44,8 +45,17 @@ route.post('/editProfile',verifyToken,storageEngine.single("profilePic"),async(r
 
       if(Object.keys(editedObj).includes('profilePic')){
 
-    const updatedPhoto = await userModel.findByIdAndUpdate(req?.user?._id,{profilePic:editedObj.profilePic},{new:true})
+    const updatedPhoto = await userModel.findByIdAndUpdate(req?.user?._id,{profilePic:editedObj.profilePic})
     
+    const oldFileName = updatedPhoto?.profilePic?.split('/')[5]
+    const oldPath = require("path").join(__dirname,`../Uploads/profile/${oldFileName}`)
+    
+   oldPath && fs.unlink(oldPath,(err)=>{
+         if(err)
+          console.log('file dosent exists');
+        
+    })
+
     if(updatedPhoto){
       optional = 'Only Profile Photo updated successfully. '
 
