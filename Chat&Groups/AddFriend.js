@@ -116,12 +116,13 @@ router.get('/viewProfile/:profileId/:userId',verifyToken,async (req,res)=>{
   const userId = req.params.userId
   
   const profileFriends = await friendModule.findOne({id:profileId}).select('friends')
+
   
-  const onlyFriends = profileFriends.friends.map(val=>(val.id)) 
+  const onlyFriends = profileFriends?.friends.map(val=>(val.id)) 
   
   const profileFriendsDetails = await userModel.find({_id:{$in:onlyFriends}}).select('email profilePic fname lname about')
 
-  const isFriend=onlyFriends.includes(userId)
+  const isFriend=onlyFriends?.includes(userId)
   
   const profileDetails = await userModel.findById(profileId).select(`-password${isFriend?'':' -phone'}`)
 
@@ -217,6 +218,33 @@ router.post('/decline',verifyToken,async (req,res)=>{
     console.log(err);
     return res.status(500).json({message:"some server error occured. Don't worry the developer team will fix this issue"})
   }
+
+})
+
+router.get('/morePeople/:userId',async(req,res)=>{
+  const userId = req.params.userId
+
+  
+  const friends = await friendModule.findOne({id:userId})
+  
+
+  const onlyFriends = friends?.friends?.map(f=>(f.id))
+   
+  
+
+  if(onlyFriends){
+    const allUsers = await userModel.find({_id:{$nin:onlyFriends}}).select('email profilePic fname lname about')
+    // console.log(allUsers);
+
+   
+    return res.status(200).json({success:true,allUsers})
+  }
+     
+    const allUsers =   await userModel.find({_id:{$nin:userId}}).select('email profilePic fname lname about')
+    
+    
+    return res.status(200).json({success:true,allUsers})
+
 
 })
 
