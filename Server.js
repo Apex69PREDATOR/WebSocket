@@ -9,6 +9,7 @@ const url = require("url")
 const conversationModule  = require("./Schemas/Conversation")
 const messageModule = require("./Schemas/Messages")
 const clients = require("./SocketStore")
+const redis = require("./RedisConn")
 require("dotenv").config()
 
 app.use(cors({
@@ -88,14 +89,20 @@ wss.on('connection',function connection(ws,req){
          const isOnline = clients.has(content?.id)
          
          //send messages from data base
+         
          const conversation = await conversationModule.findOne({members:{$all:[userId,content?.id]}})
 
-         const previousMessages = await messageModule.find({conversationId:conversation?._id})
-
-          
-         ws.send(JSON.stringify({isOnline,type:'status',previousMessages,onlineId:content.id}))
-
+         let previousMessages = await redis.get(`previousMessages:${conversation?._id}`);
          
+         if(!previousMessages){
+         previousMessages = await messageModule.find({conversationId:conversation?._id})
+         await redis.set(`previousMessages:${conversation?._id}`,JSON.stringify(previousMessages))
+         redis.expire(`previousMessages:${conversation?._id}`,120)
+         }
+         else{
+          previousMessages =  JSON.parse(previousMessages)
+         }
+         ws.send(JSON.stringify({isOnline,type:'status',previousMessages,onlineId:content.id}))
 
          // check online requests
          const clientIdExists = statusRequests.has(content?.id)
@@ -157,13 +164,18 @@ wss.on('connection',function connection(ws,req){
         path:pathList.length>0?pathList:null
       })
       await newMessage.save()
+      const previousMessagesStr =await redis.get(`previousMessages:${newConv?._id}`)
+     if(previousMessagesStr){
+      const previousMessages = JSON.parse(previousMessagesStr)      
+      previousMessages.push(newMessage)
 
-      
-       
+      await redis.set(`previousMessages:${newConv?._id}`,JSON.stringify(previousMessages))
+     }
       const updatedConvo = await conversationModule.findOneAndUpdate({members:{$all:[userId,content?.to]}},{
-        lastMessage:newMessage._id
-      })
-      await updatedConvo.save()
+        lastMessage:newMessage._id,
+        updatedAt : Date.now()
+      },{new:true})
+      
      
      if(targetSocket && targetSocket.readyState==WebSocket.OPEN){
       
