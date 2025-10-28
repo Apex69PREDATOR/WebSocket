@@ -1,3 +1,4 @@
 .env
 /SendedFiles
 /Uploads
+node_modules

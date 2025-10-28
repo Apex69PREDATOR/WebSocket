@@ -170,6 +170,7 @@ wss.on('connection',function connection(ws,req){
       previousMessages.push(newMessage)
 
       await redis.set(`previousMessages:${newConv?._id}`,JSON.stringify(previousMessages))
+      await redis.expire(`previousMessages:${newConv?._id}`,120)
      }
       const updatedConvo = await conversationModule.findOneAndUpdate({members:{$all:[userId,content?.to]}},{
         lastMessage:newMessage._id,
